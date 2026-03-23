@@ -2,8 +2,27 @@ import Product from "../models/productsModel.js";
 
 export const getProduct = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().sort({ createdAt: -1 }).limit(6);
     res.status(200).json(products);
+  } catch (error) {
+    console.error("Lỗi khi gọi lấy danh sách sản phẩm", error);
+    res.status(400).json({ message: "lỗi hệ thống" });
+  }
+};
+
+export const getProductCategory = async (req, res) => {
+  try {
+    const { category } = req.query;
+
+    const product = await Product.find()
+      .populate("category")
+      .sort({ createdAt: -1 });
+
+    const filtered = product.filter(
+      (item) => item.category?.name.toLowerCase() === category.toLowerCase(),
+    );
+
+    res.status(200).json(filtered);
   } catch (error) {
     console.error("Lỗi khi gọi lấy danh sách sản phẩm", error);
     res.status(400).json({ message: "lỗi hệ thống" });
@@ -18,14 +37,10 @@ export const addProduct = async (req, res) => {
       image,
       brand,
       category,
-      movement,
-      caseSize,
-      material,
-      year,
-      strap,
       description,
       countInStock,
       isSold,
+      details: { movement, caseSize, material, year, strap },
     } = req.body;
     const newProduct = {
       name,
@@ -33,14 +48,10 @@ export const addProduct = async (req, res) => {
       image,
       brand,
       category,
-      movement,
-      caseSize,
-      material,
-      year,
-      strap,
       description,
       countInStock,
       isSold,
+      details: { movement, caseSize, material, year, strap },
     };
     await Product.create(newProduct);
     res.status(200).json({ message: "thêm sản phẩm thành công" });

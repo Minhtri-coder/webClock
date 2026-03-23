@@ -33,13 +33,13 @@ export const postLogin = async (req, res) => {
         },
       });
     } else {
-      res.status(400).json({
+      return res.status(400).json({
         status: "sai tài khoản",
         message: "thất bại",
       });
     }
   } catch (error) {
-    res.status(400).json({ message: "bị lỗi" });
+    return res.status(400).json({ message: "bị lỗi" });
   }
 };
 
