@@ -84,22 +84,31 @@ function BodyListProducts() {
                 <button
                   className={`mt-4 border-2 px-6 py-2 text-[12px] font-bold tracking-wider transition-all duration-200
     ${
-      isInCart
-        ? "bg-black text-white"
-        : "border-black hover:bg-black hover:text-white"
+      item.countInStock === 0
+        ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+        : isInCart
+          ? "bg-black text-white"
+          : "border-black hover:bg-black hover:text-white"
     }`}
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // tránh navigate khi click button
+
+                    if (item.countInStock === 0) return; // không làm gì nếu hết hàng
 
                     if (isInCart) {
-                      navigate("/cart"); // 👈 chuyển trang
+                      navigate("/cart"); // chuyển trang
                     } else {
                       addToCart(item);
                       setIsOpen(true); // mở side cart
                     }
                   }}
+                  disabled={item.countInStock === 0} // disable button nếu hết hàng
                 >
-                  {isInCart ? "VIEW CART ->" : "ADD TO CART"}
+                  {item.countInStock === 0
+                    ? "HẾT HÀNG"
+                    : isInCart
+                      ? "VIEW CART ->"
+                      : "ADD TO CART"}
                 </button>
               </div>
             );

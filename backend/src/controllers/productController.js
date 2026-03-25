@@ -42,6 +42,11 @@ export const addProduct = async (req, res) => {
       isSold,
       details: { movement, caseSize, material, year, strap },
     } = req.body;
+
+    if (countInStock < 0) {
+      return res.status(400).json({ message: "Số lượng không hợp lệ" });
+    }
+
     const newProduct = {
       name,
       price,

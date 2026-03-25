@@ -5,6 +5,6 @@ import { isAuth, isAdmin } from "../middelware/authMiddleware.js";
 const route = express.Router();
 
 route.get("/", getOrder);
-route.post("/", isAuth, addOrder);
+route.post("/", addOrder);
 
 export default route;

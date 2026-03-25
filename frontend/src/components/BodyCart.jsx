@@ -25,11 +25,13 @@ function BodyCart() {
     <div className="bg-white min-h-screen px-4 md:px-16 py-12 font-sans">
       {/* STEP NAVIGATION - Làm chữ to và thoáng hơn */}
       <div className="text-center uppercase tracking-[0.2em] text-[16px] mb-16 flex justify-center items-center gap-2">
-        <span className="font-medium text-black">Shopping Cart</span>
+        <button className="font-medium text-black">Shopping Cart</button>
         <span className="text-gray-300 mx-2">&gt;</span>
-        <span className="text-gray-300">Checkout details</span>
+        <button onClick={() => navigate("/checkout")} className="text-gray-300">
+          Checkout details
+        </button>
         <span className="text-gray-300 mx-2">&gt;</span>
-        <span className="text-gray-300">Order complete</span>
+        <button className="text-gray-300">Order complete</button>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-16">

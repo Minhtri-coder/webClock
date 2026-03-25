@@ -10,7 +10,14 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     const stored = localStorage.getItem("cart");
-    if (stored) setCartItems(JSON.parse(stored));
+
+    if (stored) {
+      try {
+        setCartItems(JSON.parse(stored));
+      } catch (error) {
+        setCartItems([]);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -18,7 +25,12 @@ export const CartProvider = ({ children }) => {
   }, [cartItem]);
 
   const addToCart = (product, quantity = 1) => {
+    if (product.countInStock === 0) {
+      setErrorMsg("Sản phẩm đã hết hàng.");
+      return true; // trả true để báo lỗi
+    }
     let isExist = false;
+
     setCartItems((prev) => {
       const exist = prev.find((item) => item._id === product._id);
       if (exist) {
@@ -81,6 +93,7 @@ export const CartProvider = ({ children }) => {
         setErrorId,
         errorId,
         decreaseQty,
+        setCartItems,
       }}
     >
       {children}

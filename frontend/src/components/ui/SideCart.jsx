@@ -97,7 +97,13 @@ export default function SideCart({ isOpen, setIsOpen }) {
             >
               View Cart
             </button>
-            <button className="w-full bg-black text-white py-3 uppercase text-sm tracking-widest hover:bg-gray-800">
+            <button
+              className="w-full bg-black text-white py-3 uppercase text-sm tracking-widest hover:bg-gray-800"
+              onClick={() => {
+                navigate("/checkout");
+                window.scrollTo(0, 0);
+              }}
+            >
               Checkout
             </button>
           </div>

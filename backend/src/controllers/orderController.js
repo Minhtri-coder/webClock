@@ -1,4 +1,6 @@
+import sendEmail from "../../utils/sendEmail.js";
 import orderModel from "../models/orderModel.js";
+import product from "../models/productsModel.js";
 
 export const getOrder = async (req, res) => {
   try {
@@ -13,17 +15,60 @@ export const getOrder = async (req, res) => {
 
 export const addOrder = async (req, res) => {
   try {
-    const { orderItems, shippingAddress, totalPrice } = req.body;
+    const { orderItems, shippingAddress, totalPrice, paymentMethod } = req.body;
 
     const newOrder = {
       orderItems,
-      user: req.user.id,
       shippingAddress,
       totalPrice,
+      paymentMethod,
     };
 
+    if (!orderItems || orderItems.length === 0) {
+      return res.status(400).json({ message: "giỏ hàng trống" });
+    }
+    if (!shippingAddress || !shippingAddress.phone) {
+      return res.status(400).json({ message: "thiếu thông tin khách hàng" });
+    }
+
+    if (!totalPrice) {
+      return res.status(400).json({ message: "không có tổng tiền" });
+    }
+
+    const validpayment = ["paypal", "bank", "cod"];
+    if (!validpayment.includes(paymentMethod)) {
+      return res
+        .status(400)
+        .json({ message: "phương thúc thanh toán không hợp lệ" });
+    }
+
+    if (shippingAddress.emailAddress) {
+      await sendEmail(shippingAddress.emailAddress, newOrder);
+    }
+
+    for (const item of orderItems) {
+      const products = await product.findById(item.product);
+
+      if (!products) {
+        return res.status(404).json({ message: "không tìm thấy sản phẩm" });
+      }
+
+      if (products.isSold || products.countInStock <= 0) {
+        return res.status(400).json({
+          message: `Sản phẩm ${products.name} đã hết hàng`,
+        });
+      }
+      products.countInStock = products.countInStock - 1; // giảm
+      products.isSold = true; // vì bạn bán 1 cái
+
+      await products.save();
+    }
+
     await orderModel.create(newOrder);
-    res.status(201).json({ message: "thêm đơn đặt hàng thành công" });
+
+    res
+      .status(201)
+      .json({ message: "thêm đơn đặt hàng thành công", order: newOrder });
   } catch (error) {
     res
       .status(400)
