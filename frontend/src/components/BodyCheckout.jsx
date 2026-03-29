@@ -4,8 +4,10 @@ import api from "../libs/axios";
 import { useNavigate } from "react-router-dom";
 
 function BodyCheckout() {
-  const { cartItem, subtotal, setCartItems } = useContext(Cartcontext);
-  const [paymentMethod, setPaymentMethod] = useState("paypal");
+  const { cartItem, subtotal, setCartItems, totalprice, SHIPPING_FEE } =
+    useContext(Cartcontext);
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
@@ -40,8 +42,9 @@ function BodyCheckout() {
           phone: shippingAddress.phone,
           emailAddress: shippingAddress.emailAddress,
         },
-        totalPrice: subtotal,
+        totalPrice: subtotal + SHIPPING_FEE,
         paymentMethod,
+        shippingFee: SHIPPING_FEE,
       };
       const res = await api.post("/order", data);
       setCartItems([]);
@@ -62,12 +65,56 @@ function BodyCheckout() {
       ...prev,
       [name]: value,
     }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
+
+  const validate = () => {
+    let newErrors = {};
+
+    if (!shippingAddress.firstName.trim()) {
+      newErrors.firstName = "First name is a required field.";
+    }
+    if (!shippingAddress.lastName.trim()) {
+      newErrors.lastName = "Last name is a required field.";
+    }
+    if (!shippingAddress.country.trim()) {
+      newErrors.country = "country is a required field.";
+    }
+    if (!shippingAddress.address.trim()) {
+      newErrors.address = "address is a required field.";
+    }
+    if (!shippingAddress.postcode.trim()) {
+      newErrors.postcode = "postcode is a required field.";
+    }
+    if (!shippingAddress.city.trim()) {
+      newErrors.city = "city is a required field";
+    }
+    if (!shippingAddress.phone.trim()) {
+      newErrors.phone = "phone is a required field";
+    }
+    if (!shippingAddress.emailAddress.trim()) {
+      newErrors.emailAddress = "emailAddress is a required field";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setIsSubmitted(true);
+    fretch();
+    console.log("Dữ liệu OK:", shippingAddress);
   };
 
   return (
-    <div className="bg-white min-h-screen px-4 md:px-16 py-12 font-sans">
+    <div className="bg-white min-h-screen px-4 md:px-16 py-12 font-sans ">
       {/* STEP NAVIGATION - Làm chữ to và thoáng hơn */}
-      <div className="text-center uppercase tracking-[0.2em] text-[16px] mb-16 flex justify-center items-center gap-2">
+      <div className="text-center uppercase tracking-[0.2em] text-[16px]  flex justify-center items-center gap-2">
         <button
           onClick={() => navigate("/cart")}
           className="font-medium text-black"
@@ -79,14 +126,18 @@ function BodyCheckout() {
         <span className="text-gray-300 mx-2">&gt;</span>
         <button className="text-gray-300">Order complete</button>
       </div>
-      <div className="flex flex-col lg:flex-row gap-12 p-24">
+      <div className="flex flex-col lg:flex-row gap-12 p-24 ">
         {/* BÊN TRÁI: BILLING DETAILS */}
-        <div className="flex-[1.5]">
+        <div className="flex-[1.5] ">
           <h2 className="text-[18px] font-bold tracking-widest mb-6 uppercase">
             Billing details
           </h2>
 
-          <form className="grid grid-cols-2 gap-4">
+          <form
+            className="grid grid-cols-2 gap-4"
+            id="checkoutForm"
+            onSubmit={handleSubmit}
+          >
             <div className="col-span-1">
               <label className="block mb-2 font-medium">First name</label>
               <input
@@ -94,8 +145,13 @@ function BodyCheckout() {
                 name="firstName"
                 onChange={handleChange}
                 value={shippingAddress.firstName}
-                className="w-full border border-gray-300 p-2 outline-none focus:border-black transition"
+                className={`w-full border border-gray-300 p-2 outline-none focus:border-black transition ${
+                  errors.firstName ? "border-red-500 " : "border-gray-300"
+                }`}
               />
+              {errors.firstName && (
+                <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+              )}
             </div>
             <div className="col-span-1">
               <label className="block mb-2 font-medium">Last name</label>
@@ -104,8 +160,13 @@ function BodyCheckout() {
                 name="lastName"
                 onChange={handleChange}
                 value={shippingAddress.lastName}
-                className="w-full border border-gray-300 p-2 outline-none focus:border-black transition"
+                className={`w-full border border-gray-300 p-2 outline-none focus:border-black transition ${
+                  errors.lastName ? "border-red-500 " : "border-gray-300"
+                }`}
               />
+              {errors.lastName && (
+                <p className="text-red-500 text-xs mt-1 ">{errors.lastName}</p>
+              )}
             </div>
 
             <div className="col-span-2">
@@ -115,7 +176,7 @@ function BodyCheckout() {
                 value={shippingAddress.country}
                 onChange={handleChange}
                 className={`w-full border p-2 ${
-                  errors.country ? "border-red-500" : "border-gray-300"
+                  errors.country ? "border-red-500 " : "border-gray-300"
                 }`}
               >
                 <option value="">Select a country / region...</option>
@@ -124,11 +185,13 @@ function BodyCheckout() {
               </select>
 
               {errors.country && (
-                <p className="text-red-500 text-sm">{errors.country}</p>
+                <p className="text-red-500 text-xs mt-1 text-sm">
+                  {errors.country}
+                </p>
               )}
             </div>
 
-            <div className="col-span-1">
+            <div className="col-span-2">
               <label className="block mb-2 font-medium">Street address</label>
               <input
                 type="text"
@@ -136,8 +199,13 @@ function BodyCheckout() {
                 onChange={handleChange}
                 value={shippingAddress.address}
                 placeholder="House number and street name"
-                className="w-full border border-gray-300 p-2 outline-none"
+                className={`w-full border border-gray-300 p-2 outline-none ${
+                  errors.address ? "border-red-500 " : "border-gray-300"
+                }`}
               />
+              {errors.address && (
+                <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+              )}
             </div>
 
             <div className="col-span-2">
@@ -149,8 +217,13 @@ function BodyCheckout() {
                 name="postcode"
                 onChange={handleChange}
                 value={shippingAddress.postcode}
-                className="w-full border border-gray-300 p-2 outline-none"
+                className={`w-full border border-gray-300 p-2 outline-none ${
+                  errors.postcode ? "border-red-500 " : "border-gray-300"
+                }`}
               />
+              {errors.postcode && (
+                <p className="text-red-500 text-xs mt-1">{errors.postcode}</p>
+              )}
             </div>
 
             <div className="col-span-2">
@@ -160,8 +233,13 @@ function BodyCheckout() {
                 name="city"
                 onChange={handleChange}
                 value={shippingAddress.city}
-                className="w-full border border-gray-300 p-2 outline-none"
+                className={`w-full border border-gray-300 p-2 outline-none ${
+                  errors.city ? "border-red-500 " : "border-gray-300"
+                }`}
               />
+              {errors.city && (
+                <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+              )}
             </div>
 
             <div className="col-span-2">
@@ -171,8 +249,13 @@ function BodyCheckout() {
                 name="phone"
                 onChange={handleChange}
                 value={shippingAddress.phone}
-                className="w-full border border-gray-300 p-2 outline-none"
+                className={`w-full border border-gray-300 p-2 outline-none ${
+                  errors.phone ? "border-red-500 " : "border-gray-300"
+                }`}
               />
+              {errors.phone && (
+                <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+              )}
             </div>
 
             <div className="col-span-2">
@@ -182,8 +265,15 @@ function BodyCheckout() {
                 name="emailAddress"
                 onChange={handleChange}
                 value={shippingAddress.emailAddress}
-                className="w-full border border-gray-300 p-2 outline-none"
+                className={`w-full border border-gray-300 p-2 outline-none ${
+                  errors.emailAddress ? "border-red-500 " : "border-gray-300"
+                }`}
               />
+              {errors.lastName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.emailAddress}
+                </p>
+              )}
             </div>
           </form>
         </div>
@@ -204,12 +294,13 @@ function BodyCheckout() {
             {cartItem.map((item) => (
               <div
                 key={item._id}
-                className="flex justify-between mb-4 text-gray-500 italic"
+                className="flex justify-between mb-4 text-gray-500 italic text-sm flex-wrap"
               >
-                <span className="uppercase">
+                <span className="uppercase break-words max-w-[70%]">
                   {item.name} ref {item._id?.slice(-5)} × {item.qty}
                 </span>
-                <span className="text-black font-medium">
+
+                <span className="text-black font-medium whitespace-nowrap">
                   {item.price.toLocaleString()} $
                 </span>
               </div>
@@ -219,9 +310,13 @@ function BodyCheckout() {
               <span>Subtotal</span>
               <span>{subtotal.toLocaleString()} $</span>
             </div>
-            <div className="flex justify-between border-b pb-4 mb-6 font-bold text-[15px]">
+            <div className="flex justify-between pt-4 pb-2 mb-2 font-bold">
+              <span>ShippingFee</span>
+              <span>{totalprice.toLocaleString()} $</span>
+            </div>
+            <div className="flex justify-between  border-t  pb-4 mb-6 font-bold text-[15px]">
               <span>Total</span>
-              <span>{subtotal.toLocaleString()} $</span>
+              <span>{totalprice.toLocaleString()} $</span>
             </div>
 
             {/* PHƯƠNG THỨC THANH TOÁN */}
@@ -230,23 +325,23 @@ function BodyCheckout() {
                 <input
                   type="radio"
                   name="payment"
-                  id="paypal"
-                  checked={paymentMethod === "paypal"}
-                  onChange={() => setPaymentMethod("paypal")}
+                  id="cod"
+                  checked={paymentMethod === "cod"}
+                  onChange={() => setPaymentMethod("cod")}
                   className="mt-1"
                 />
-                <label htmlFor="paypal" className="font-bold cursor-pointer">
-                  PayPal Goods and Services
+                <label htmlFor="cod" className="font-bold cursor-pointer">
+                  Cod Goods and Services
                 </label>
               </div>
 
-              {paymentMethod === "paypal" && (
+              {paymentMethod === "cod" && (
                 <div className="text-gray-600 leading-relaxed ml-6 italic">
-                  Our PayPal details will appear after you fill in your shipping
+                  Our Cod details will appear after you fill in your shipping
                   information...
                   <p className="mt-2">
-                    Once you have made the payment, please let us know via Email
-                    or WhatsApp
+                    Cash payment will incur an additional shipping fee of 30,000
+                    VND per order nationwide.
                   </p>
                 </div>
               )}
@@ -264,6 +359,26 @@ function BodyCheckout() {
                   Bank Transfer - Discount 5%
                 </label>
               </div>
+              {paymentMethod === "bank" && (
+                <div className="text-gray-600 leading-relaxed ml-6 italic">
+                  Our bank transfer details will appear after you fill in your
+                  shipping information completely and click the PLACE ORDER
+                  button below. ————————————————————–
+                  <p>
+                    We will not be responsible if you transfer the funds using
+                    incorrect payment details. Please contact us via Email or
+                    WhatsApp to confirm the details before making the transfer.
+                    ————————————————————–
+                  </p>
+                  <p>
+                    Please include the payment description: SPACETIME – your
+                    Order ID ————————————————————–
+                  </p>
+                  <p className="mt-2">
+                    Your order will be shipped once the payment is confirmed.
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-start gap-3 mt-8">
                 <input type="checkbox" id="terms" className="mt-1" />
@@ -275,7 +390,8 @@ function BodyCheckout() {
 
               <button
                 className="w-full bg-black text-white py-4 mt-4 uppercase tracking-[0.2em] font-bold hover:bg-gray-800 transition"
-                onClick={fretch}
+                type="submit"
+                form="checkoutForm"
               >
                 Place Order
               </button>

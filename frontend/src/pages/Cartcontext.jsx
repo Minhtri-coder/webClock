@@ -7,6 +7,7 @@ export const CartProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [errorId, setErrorId] = useState(null);
+  const SHIPPING_FEE = 30000;
 
   useEffect(() => {
     const stored = localStorage.getItem("cart");
@@ -79,6 +80,8 @@ export const CartProvider = ({ children }) => {
     0,
   );
 
+  const totalprice = subtotal + SHIPPING_FEE;
+
   return (
     <Cartcontext.Provider
       value={{
@@ -94,6 +97,8 @@ export const CartProvider = ({ children }) => {
         errorId,
         decreaseQty,
         setCartItems,
+        totalprice,
+        SHIPPING_FEE,
       }}
     >
       {children}

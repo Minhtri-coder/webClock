@@ -49,7 +49,9 @@ function ProductsBody() {
             className="w-full h-[220px] lg:h-[250px] object-cover"
           />
           <p className="mt-3 text-sm">{getItem(-1)?.name}</p>
-          <p className="font-semibold">{getItem(-1)?.price}</p>
+          <p className="font-semibold">
+            {getItem(-1)?.price.toLocaleString("vi-VN") + " đ"}
+          </p>
         </div>
 
         {/* CENTER */}
@@ -63,7 +65,9 @@ function ProductsBody() {
               className="w-full h-[250px] md:h-[300px] object-cover"
             />
             <p className="mt-4 text-sm md:text-base">{getItem(0)?.name}</p>
-            <p className="font-semibold">{getItem(0)?.price}</p>
+            <p className="font-semibold">
+              {getItem(0)?.price.toLocaleString("vi-VN") + " đ"}
+            </p>
           </div>
         </div>
 
@@ -74,7 +78,9 @@ function ProductsBody() {
             className="w-full h-[220px] lg:h-[250px] object-cover"
           />
           <p className="mt-3 text-sm">{getItem(1)?.name}</p>
-          <p className="font-semibold">{getItem(1)?.price}</p>
+          <p className="font-semibold">
+            {getItem(1)?.price.toLocaleString("vi-VN") + " đ"}
+          </p>
         </div>
 
         {/* BUTTON LEFT */}

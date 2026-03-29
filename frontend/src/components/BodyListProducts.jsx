@@ -78,7 +78,9 @@ function BodyListProducts() {
                 </h3>
 
                 {/* PRICE */}
-                <p className="mt-2 text-[14px] font-bold">{item.price} $</p>
+                <p className="mt-2 text-[14px] font-bold">
+                  {item.price.toLocaleString("vi-VN") + " đ"}{" "}
+                </p>
 
                 {/* BUTTON */}
                 <button

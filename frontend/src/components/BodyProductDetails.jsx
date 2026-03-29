@@ -69,7 +69,7 @@ function BodyProductDetails() {
             </h2>
             <p className="text-lg md:text-xl font-semibold text-gray-800 mt-1">
               {/* $10,200 */}
-              {product.price}
+              {product.price.toLocaleString("vi-VN") + " đ"}
             </p>
           </div>
 

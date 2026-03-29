@@ -31,7 +31,7 @@ const orderSchema = mongoose.Schema(
       required: true,
       enum: ["paypal", "bank", "cod"],
     },
-
+    shippingFee: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
     status: {
       type: String,

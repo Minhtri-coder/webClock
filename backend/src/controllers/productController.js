@@ -2,7 +2,10 @@ import Product from "../models/productsModel.js";
 
 export const getProduct = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 }).limit(6);
+    const products = await Product.find()
+      .populate("category", "name")
+      .sort({ createdAt: -1 })
+      .limit(6);
     res.status(200).json(products);
   } catch (error) {
     console.error("Lỗi khi gọi lấy danh sách sản phẩm", error);
@@ -31,21 +34,12 @@ export const getProductCategory = async (req, res) => {
 
 export const addProduct = async (req, res) => {
   try {
-    const {
-      name,
-      price,
-      image,
-      brand,
-      category,
-      description,
-      countInStock,
-      isSold,
-      details: { movement, caseSize, material, year, strap },
-    } = req.body;
+    const { name, price, image, brand, category, description, details } =
+      req.body;
 
-    if (countInStock < 0) {
-      return res.status(400).json({ message: "Số lượng không hợp lệ" });
-    }
+    // if (countInStock < 0) {
+    //   return res.status(400).json({ : "Số lượng không hợp lệ" });
+    // }
 
     const newProduct = {
       name,
@@ -54,9 +48,9 @@ export const addProduct = async (req, res) => {
       brand,
       category,
       description,
-      countInStock,
-      isSold,
-      details: { movement, caseSize, material, year, strap },
+      isSold: false,
+      details,
+      createdAt: new Date(),
     };
     await Product.create(newProduct);
     res.status(200).json({ message: "thêm sản phẩm thành công" });
@@ -80,21 +74,8 @@ export const productDetails = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    const {
-      name,
-      price,
-      image,
-      brand,
-      category,
-      movement,
-      caseSize,
-      material,
-      year,
-      strap,
-      description,
-      countInStock,
-      isSold,
-    } = req.body;
+    const { name, price, image, brand, category, details, description } =
+      req.body;
     const updateProduct = await Product.findByIdAndUpdate(
       req.params.id,
       {
@@ -103,14 +84,10 @@ export const updateProduct = async (req, res) => {
         image,
         brand,
         category,
-        movement,
-        caseSize,
-        material,
-        year,
-        strap,
         description,
-        countInStock,
-        isSold,
+        isSold: false,
+        details,
+        createdAt: new Date(),
       },
       { new: true },
     );

@@ -1,40 +1,31 @@
 import jwt from "jsonwebtoken";
 
-// 1. Kiểm tra xem người dùng có đăng nhập chưa
 export const isAuth = (req, res, next) => {
-  // SỬA TẠI ĐÂY: Dùng 'let' thay vì 'const' để có thể gán lại giá trị
-  let token = req.headers.token || req.headers.authorization;
+  console.log("HEADERS:", req.headers);
 
-  if (token && token.startsWith("Bearer ")) {
-    // Bây giờ việc gán lại giá trị này sẽ không còn bị lỗi nữa
-    token = token.split(" ")[1];
+  let token;
+
+  const authHeader = req.headers.authorization;
+
+  console.log("AUTH HEADER:", authHeader);
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
   }
 
+  console.log("TOKEN AFTER SPLIT:", token);
+
   if (!token) {
-    return res
-      .status(401)
-      .json({ message: "Bạn chưa đăng nhập! Hãy trình vé." });
+    return res.status(401).json({ message: "Bạn chưa đăng nhập!" });
   }
 
   try {
-    // Giải mã token bằng chìa khóa bí mật
-    const decoded = jwt.verify(token, "DONG_HO_KY");
-
-    // Lưu thông tin vào req.user (Lưu ý: object này sẽ có trường .id như bạn đã sign lúc Login)
+    const decoded = jwt.verify(token, "dong_ho_ky");
+    console.log("DECODED:", decoded);
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Vé không hợp lệ hoặc đã hết hạn" });
-  }
-};
-
-// 2. Kiểm tra admin
-export const isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
-    next();
-  } else {
-    return res
-      .status(403)
-      .json({ message: "Lỗi! Bạn không phải Admin, không được vào đây." });
+    console.log("JWT ERROR:", error.message);
+    return res.status(401).json({ message: "Token không hợp lệ hoặc hết hạn" });
   }
 };

@@ -18,26 +18,21 @@ export const getUser = async (req, res) => {
 export const postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await userModel.findOne({ email });
-    if (user && user.password === password) {
-      const token = jwt.sign({ id: user._id, role: user.role }, "DONG_HO_KY", {
-        expiresIn: "365d",
-      });
-      return res.status(200).json({
-        status: "Đăng nhập thành công",
-        message: "thành công",
-        token: token,
-        user: {
-          name: user.name,
-          role: user.role,
-        },
-      });
-    } else {
-      return res.status(400).json({
-        status: "sai tài khoản",
-        message: "thất bại",
-      });
+    const user = await userModel.findOne({ email, password });
+
+    if (user.role !== "admin") {
+      return res.status(403).json({ message: "truy cập bị từ chối" });
     }
+    const token = jwt.sign({ id: user._id, role: user.role }, "dong_ho_ky", {
+      expiresIn: "1d",
+    });
+
+    return res.status(200).json({
+      status: "Đăng nhập thành công",
+      message: "thành công",
+      token: token,
+      adminName: user.name,
+    });
   } catch (error) {
     return res.status(400).json({ message: "bị lỗi" });
   }

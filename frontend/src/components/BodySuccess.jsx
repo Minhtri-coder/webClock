@@ -32,7 +32,7 @@ function BodySuccess() {
         <div className="border-t pt-4 text-sm space-y-2">
           <div className="flex justify-between">
             <span>Total</span>
-            <span>{order?.totalPrice?.toLocaleString()} $</span>
+            <span>{order?.totalPrice?.toLocaleString("vi-VN") + " đ"}</span>
           </div>
 
           <div className="flex justify-between">
@@ -49,13 +49,20 @@ function BodySuccess() {
         {/* Products */}
         <div className="mt-6 border-t pt-4 space-y-2 text-sm">
           {order?.orderItems?.map((item) => (
-            <div key={item.product} className="flex justify-between">
-              <span>
-                {item.name} × {item.qty}
-              </span>
-              <span>{item.price}$</span>
+            <div key={item.product}>
+              <div className="flex justify-between">
+                <span>
+                  {item.name} × {item.qty}
+                </span>
+                <span>{item.price.toLocaleString("vi-VN") + " đ"}</span>
+              </div>
             </div>
           ))}
+
+          <div className="flex justify-between mt-4 font-medium">
+            <span>ShippingFee</span>
+            <span>{order?.shippingFee.toLocaleString("vi-VN") + " đ"}</span>
+          </div>
         </div>
 
         {/* Button */}

@@ -4,10 +4,8 @@ import product from "../models/productsModel.js";
 
 export const getOrder = async (req, res) => {
   try {
-    const listorder = await orderModel.find();
-
+    const listorder = await orderModel.find().sort({ createdAt: -1 });
     res.json({ listorder });
-    res.status(200).json({ message: "danh sách đơn hàng" });
   } catch (error) {
     res.status(400).json({ message: "danh sách bị lỗi" });
   }
@@ -15,13 +13,20 @@ export const getOrder = async (req, res) => {
 
 export const addOrder = async (req, res) => {
   try {
-    const { orderItems, shippingAddress, totalPrice, paymentMethod } = req.body;
+    const {
+      orderItems,
+      shippingAddress,
+      totalPrice,
+      paymentMethod,
+      shippingFee,
+    } = req.body;
 
     const newOrder = {
       orderItems,
       shippingAddress,
       totalPrice,
       paymentMethod,
+      shippingFee,
     };
 
     if (!orderItems || orderItems.length === 0) {
@@ -76,6 +81,25 @@ export const addOrder = async (req, res) => {
   }
 };
 
+export const getSumOrder = async (req, res) => {
+  try {
+    const order = await orderModel.find();
+    const totalRevenus = order.reduce(
+      (sum, order) => sum + order.totalPrice,
+      0,
+    );
+
+    const totalItem = order.reduce((sum, order) => {
+      return sum + order.orderItems.reduce((s, item) => s + item.qty, 0);
+    }, 0);
+
+    res.json({ totalRevenus, totalItem, totalOrder: order.length });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: "bị lỗi tổng hoá đơn" });
+  }
+};
+
 export const getOrderById = async (req, res) => {
   try {
     const order = await orderModel
@@ -87,5 +111,18 @@ export const getOrderById = async (req, res) => {
     res.json(order);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+export const updateStatus = async (req, res) => {
+  try {
+    const order = await orderModel.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true },
+      res.json(order),
+    );
+  } catch (error) {
+    res.status(400).json({ message: " bị lỗi" });
   }
 };
